@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Ripple Geopolitical Events Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Global Ripple</h1> <!-- Title added here -->
+
+    <div>
+        <select id="event-select">
+            <option value="none">Select a Event</option>
+            <option value="israel-gaza">Israel-Gaza Conflict</option>
+            <option value="ukraine-crisis">Ukraine Crisis</option>
+            <option value="myanmar-civil-war">Myanmar Civil War</option>
+        </select>
+    </div>
+
+    <div id="map"></div>
+    <div id="info">
+        <h2>Please select an event and hover over country! 🙏 </h2>
+        <p id="country-info">Details will appear here.</p>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet-ajax"></script>
+    <script>
+        // Initialize Map
+        const map = L.map('map', {
+            center: [20, 0],
+            zoom: 2,
+            maxZoom: 10,
+            minZoom: 2,
+            zoomControl: true,
+            maxBounds: [[-90, -180], [90, 180]], // Limits the map to the global bounds
+            maxBoundsViscosity: 1.0, // Ensures the map stays within the bounds even when zoomed out fully
+        });
+
+        const satelliteUrl = 'https://api.mapbox.com/styles/v1/mapbox/dark-v10/tiles/{z}/{x}/{y}?access_token=YOUR_MAPBOX_ACCESS_TOKEN';
+
+        const mapboxUrl = 'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=YOUR_MAPBOX_ACCESS_TOKEN';
+
+        L.tileLayer(mapboxUrl, {
+            id: 'your-custom-style-id', // Replace with your custom Mapbox Style ID
+            attribution: '© Mapbox, © OpenStreetMap contributors',
+            tileSize: 512,
+            zoomOffset: -1,
+            maxZoom: 18,
+            minZoom: 2,
+            bounds: [[-90, -180], [90, 180]],
+            noWrap: true, // Prevent infinite scrolling
+        }).addTo(map);
+
+        function style(feature) {
+            return {
+                fillColor: '#555555',
+                weight: 1,
+                opacity: 1,
+                color: '#FFFFFF',
+                fillOpacity: 0.7
+            };
+        }
+        function onEachFeature(feature, layer) {
+            // Bind tooltip with country name to each country feature
+            layer.bindTooltip(feature.properties.ADMIN, { permanent: false, direction: 'center' });
+
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight
+            });
+
+            layer.on('click', () => {
+                const countryName = feature.properties.ADMIN || 'Unknown';
+                const event = document.getElementById('event-select').value;
+                showCountryImpact(countryName, event, layer);
+            });
+        }
+
+        function highlightFeature(e) {
+            const layer = e.target;
+            layer.setStyle({
+                weight: 3,
+                color: 'red',  // Red border color for the highlighted country
+                fillOpacity: 0.5,  // Semi-transparent fill
+                fillColor: 'red'  // Set the fill color to red
+            });
+            layer.addClass('highlighted');
+
+            const name = layer.feature.properties.ADMIN || 'Unknown';
+            document.querySelector('#info h2').innerText = `Country: ${name}`;
+        }
+
+        function resetHighlight(e) {
+            geojsonLayer.resetStyle(e.target);
+            e.target.removeClass('highlighted');
+            document.querySelector('#info h2').innerText = 'Hover over a country';
+        }
+
+        const geojsonLayer = L.geoJson(null, {
+            style: style,
+            onEachFeature: onEachFeature
+        }).addTo(map);
+
+        const geojsonUrl = 'https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson';
+        fetch(geojsonUrl)
+            .then(response => response.json())
+            .then(data => geojsonLayer.addData(data));
+
+        // Event listener for dropdown menu
+        document.getElementById('event-select').addEventListener('change', function() {
+            const event = this.value;
+            updateEventInfo(event);
+        });
+
+        function updateEventInfo(event) {
+            const eventInfo = {
+                'israel-gaza': {
+                    title: 'Israel-Gaza Conflict 💥',
+                    description: 'A prolonged and ongoing conflict between Israel and Gaza-based Palestinian factions, with significant international implications.'
+                },
+                'ukraine-crisis': {
+                    title: 'Ukraine Crisis 🧨',
+                    description: 'A geopolitical struggle between Russia and Ukraine, involving territorial disputes, military conflict, and international sanctions.'
+                },
+                'myanmar-civil-war': {
+                    title: 'Myanmar Civil War 🔫',
+                    description: 'An ongoing civil conflict in Myanmar following the 2021 military coup, with widespread protests and resistance against military rule. '
+                },
+                'none': {
+                    title: 'Hover over a country',
+                    description: 'Select a geopolitical event to learn more about it.'
+                }
+            };
+
+            const eventDetail = eventInfo[event];
+            document.querySelector('#info h2').innerText = eventDetail.title;
+            document.querySelector('#country-info').innerText = eventDetail.description;
+        }
+
+        function showCountryImpact(countryName, event, layer) {
+            const impacts = {
+                'myanmar-civil-war': {
+                    'Thailand': {
+                        title: 'Impact on Thailand 🇹🇭',
+                        description: `
+                            • Refugees 🏃‍♂️ fleeing Myanmar due to conflict<br>
+                            • Increased border security 👮‍♀️<br>
+                            • Humanitarian aid needed 🚑<br>
+                            • Tensions in border provinces due to refugee influx 🚧<br>
+                            <br><strong>Personal Story:</strong><br>
+                            "I’m Somsak, a border patrol officer stationed at the Thailand-Myanmar border. Every day, I watch people fleeing their homes, leaving behind everything they’ve known, just to find safety. The refugees look scared, lost, and exhausted. I remember the first time I saw a mother with two young children, barely able to carry their belongings. My team and I try to do what we can to help them, but it’s never enough. The government sends food and supplies, but it’s not enough to meet the overwhelming need. Sometimes, I can’t help but feel helpless, as the refugee numbers keep rising every day. This conflict is destroying lives, and we are struggling to provide even basic shelter and care."                    `
+                    },
+                    'India': {
+                        title: 'Impact on India 🇮🇳',
+                        description: `
+                            • Migration from Myanmar into northeastern states 🇲🇲➡️🇮🇳<br>
+                            • Security concerns along the border 🛡️<br>
+                            • Ethnic ties with Myanmar's groups, causing solidarity and potential unrest 🤝<br>
+                            • Political and social pressure to manage refugees 🏠<br>
+                            <br><strong>Personal Story:</strong><br>
+                            "My name is Asha, and I teach at a school in Mizoram, one of India's northeastern states. Many of my students are refugees from Myanmar. I remember the first time a little child entered my class; his clothes were ragged, and his eyes were filled with terror. He didn't say much, but glanced at the ground. He'd lost everything, including his home, friends, and entire life. As a teacher, it is difficult to explain to these students why their world has been flipped upside down. But I try to make them feel welcome and give them some hope. We provide them with knowledge, a safe haven, and a sense of normalcy in the middle of their stress. It is the least I can do to help them cope.                    `
+                    },
+                    'China': {
+                        title: 'Impact on China 🇨🇳',
+                        description: `
+                            • Investments at risk due to instability 💸<br>
+                            • Diplomatic pressure to mediate 🗣️<br>
+                            • Potential economic consequences from disrupted trade routes 🏗️<br>
+                            • China balances relationships with Myanmar’s military government and international calls for human rights 🕊️<br>
+                            <br><strong>Personal Story:</strong><br>
+                            "I’m Zhao, a businessman based in China with investments in Myanmar. These days, I can’t help but feel a constant sense of uncertainty. The conflict has disrupted everything. My company’s operations in Myanmar are at a standstill, and we don’t know how long the situation will last. Every phone call I receive from my colleagues there is filled with uncertainty and concern for their safety. As a businessman, it’s difficult to calculate the cost of this instability. Our trade routes are interrupted, our investments are at risk, and we face increasing diplomatic pressure from both Myanmar’s military government and international organizations calling for human rights intervention. I find myself caught in the middle, trying to keep my business afloat while also considering the human cost of this ongoing conflict."
+
+                        `
+                    },
+                    'Bangladesh': {
+                        title: 'Impact on Bangladesh 🇧🇩',
+                        description: `
+                            • Increased refugee influx (Rohingya crisis) 🏚️<br>
+                            • Economic strain from humanitarian aid 💰<br>
+                            • Growing diplomatic pressure to act as a mediator 🕊️<br>
+                            • Social tensions due to large refugee population 🏚️<br>
+                            <strong>Personal Story:</strong><br>
+                            "I’m Amin, a volunteer in Cox’s Bazar, Bangladesh. I work with many refugees who have fled Myanmar, mostly from the Rohingya community. Every day, I meet families who have walked miles, some barefoot, carrying nothing but the clothes on their backs. I’ll never forget the first time a group of mothers arrived at our camp with their children. They were weak, dehydrated, and frightened. Their eyes told stories of unspeakable hardship. My job is to help provide food, shelter, and medical care, but there’s never enough. The resources we have are stretched thin, and every day, more refugees arrive. The social tension is palpable – the local community, already struggling, is now faced with the burden of this refugee crisis. It’s heart-wrenching, knowing that while we try to provide some assistance, we’re only scratching the surface of a much bigger problem."                    `
+                    }
+                }
+            };
+
+            const countryImpact = impacts[event] && impacts[event][countryName] || { 
+            title: 'No specific impact information available', 
+            description: '' 
+            };
+
+            // Highlight the country when clicked
+            layer.setStyle({
+                weight: 3,
+                color: 'red',
+                fillOpacity: 0.5
+            });
+
+            // Clear previous box content and display new information
+            document.querySelector('#info h2').innerText = '';  // Clear previous heading or box content
+            document.getElementById('country-info').innerHTML = `
+                <strong>🌍 Country:</strong> ${countryName}<br>
+                <strong>${countryImpact.title}</strong><br> 
+                <br>
+                ${countryImpact.description}
+            `;
+
+            // Clear the hover text or replace it with the clicked country's name
+            document.querySelector('#info h2').innerText = '';
+        }
+
+
+        map.setMaxZoom(5); // Dynamically adjust the maximum zoom level
+    </script>
+</body>
+</html>

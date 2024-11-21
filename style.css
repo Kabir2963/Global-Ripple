@@ -1,0 +1,90 @@
+/* style.css */
+body {
+    background-color: #0c0c0c;  /* Dark background color */
+    color: #fff;  /* White text color for contrast */
+    font-family: 'Roboto', sans-serif;  /* Custom font from Google Fonts */
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;  /* Full screen height */
+}
+
+h1 {
+    color: #fff;  /* White color for title */
+    text-align: center;
+    padding: 20px;
+    font-family: "Times New Roman", Times, serif;
+    font-style: italic;
+    font-size: 42px;
+    font-weight: 700;
+    margin: 0;
+    background: none;  /* Remove background */
+}
+
+#map {
+    flex-grow: 1;
+    background-color: #0c0c0c; /* Sea color when tiles are missing */
+    border: 1px solid #333;
+}
+
+#info {
+    padding: 20px;
+    background-color: #1e1e1e;  /* Slightly lighter background for the info box */
+    border-radius: 8px;
+    color: #ddd;  /* Light text color */
+    height: 20vh;  /* Increase the height of the info section */
+    overflow-y: auto;  /* Allow scrolling if content overflows */
+    font-size: 18px;  /* Increase font size for info */
+}
+
+#info h2 {
+    font-size: 22px;  /* Increase heading font size */
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+#info p {
+    font-size: 18px;  /* Increase paragraph font size */
+    line-height: 1.6;  /* Improve line height for readability */
+}
+
+select {
+    margin: 10px auto;
+    display: block;  /* Center dropdown */
+    padding: 15px;
+    background-color: #333;  /* Dark dropdown background */
+    color: #fff;  /* White text */
+    border: 2px solid transparent;  /* Initially no border, to add stroke on hover/focus */
+    font-size: 20px;  /* Increase font size for the dropdown */
+    border-radius: 5px;
+    cursor: pointer;
+    background: none;  /* Remove dropdown background */
+    transition: background-color 0.3s, border-color 0.3s;  /* Smooth transition for background and border */
+}
+
+select:hover {
+    background-color: #000000;  /* Darken background on hover */
+    border-color: #f00;  /* Red stroke on hover */
+}
+
+select:focus {
+    outline: none;
+    background-color: #000000;  /* Darker background on focus */
+    border-color: #f00;  /* Red stroke on focus */
+}
+
+select:active {
+    background-color: #666;  /* Slightly darker background when clicked */
+}
+
+/* Optional: Style the tooltip */
+.leaflet-tooltip {
+    background-color: rgba(0, 0, 0, 0.6);  /* Semi-transparent background */
+    color: white;  /* White text for visibility */
+    font-size: 14px;  /* Adjust font size */
+    font-weight: bold;  /* Make the text bold */
+    padding: 5px;  /* Add padding around the text */
+    border-radius: 3px;  /* Rounded corners */
+}
